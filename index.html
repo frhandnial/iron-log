@@ -281,6 +281,57 @@ td:first-child{white-space:normal;min-width:130px}
 .pick:last-child{border-bottom:0}
 .pick>span:first-child{font-weight:600}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 66px);z-index:60;max-width:calc(100% - 32px);padding:10px 16px;border-radius:999px;background:var(--ink);color:var(--bg);font-weight:600;font-size:15px;text-align:center}
+/* motion: views rise in when opened, sets pop when ticked, the tab marker slides, sheets and the timer slide up.
+   Only view changes replay entrances; ordinary taps re-render without them. */
+.tabs-in{position:relative}
+.tab-ind{position:absolute;top:0;left:0;width:0;height:3px;pointer-events:none;transition:transform .38s cubic-bezier(.2,.8,.2,1),width .38s cubic-bezier(.2,.8,.2,1)}
+.tab-ind::after{content:"";display:block;height:3px;margin:0 30%;border-radius:0 0 3px 3px;background:var(--accent)}
+.tab svg{transition:transform .15s}
+.tab:active svg{transform:scale(.86)}
+.tab[aria-current="page"] svg{animation:tabPop .45s cubic-bezier(.2,.8,.2,1)}
+.btn,.chip,.starter,.check,.icon-btn,.pick,.stepper button,.timer-btns button{transition:transform .14s cubic-bezier(.2,.8,.2,1),background-color .2s,border-color .2s,color .2s}
+.btn:active:not(:disabled),.chip:active,.starter:active,.check:active,.icon-btn:active:not(:disabled),.stepper button:active:not(:disabled),.timer-btns button:active{transform:scale(.95)}
+.hrow{transition:background-color .2s}
+.hrow:active{background:var(--surface-2)}
+@media (hover:hover){.btn:not(.danger):not(.primary):not(:disabled):hover,.chip:hover,.starter:hover,.icon-btn:hover,.check:hover{border-color:var(--accent)}.hrow:hover,.pick:hover{background:var(--surface-2)}}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes popIn{0%{transform:scale(.6)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
+@keyframes tabPop{0%{transform:scale(1)}45%{transform:scale(1.2) translateY(-2px)}100%{transform:scale(1)}}
+@keyframes draw{from{stroke-dashoffset:22}to{stroke-dashoffset:0}}
+@keyframes rowGlow{from{background:var(--ok)}to{background:var(--ok-soft)}}
+@keyframes ring{from{box-shadow:0 0 0 0 var(--ok)}to{box-shadow:0 0 0 14px transparent}}
+@keyframes pulse{50%{transform:scale(1.08)}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-12px)}to{opacity:1;transform:translate(-50%,0)}}
+main.enter>*{animation:rise .42s cubic-bezier(.2,.8,.2,1) both}
+main.enter>:nth-child(2){animation-delay:.05s} main.enter>:nth-child(3){animation-delay:.1s} main.enter>:nth-child(4){animation-delay:.15s}
+main.enter>:nth-child(5){animation-delay:.2s} main.enter>:nth-child(6){animation-delay:.25s} main.enter>:nth-child(n+7){animation-delay:.3s}
+main.enter .goals>*,main.enter .hlist>*{animation:rise .4s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(min(var(--i,0),8)*45ms + .1s)}
+main.enter .day.trained i,main.enter .heat i.h1,main.enter .heat i.h2{animation:popIn .4s cubic-bezier(.2,.8,.2,1) .3s both}
+main.enter .chart .ar,main.enter .chart .pt,main.enter .chart .end{animation:fade .5s .6s both}
+[data-grow]{transition:width .6s cubic-bezier(.2,.8,.2,1),left .6s cubic-bezier(.2,.8,.2,1)}
+.wbar{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.wbar i{display:block;height:100%;border-radius:3px;background:var(--ok)}
+.card.ex.complete{border-color:var(--ok)}
+.set.done-pop{animation:rowGlow .6s ease-out}
+.set.done-pop .check{animation:popIn .4s cubic-bezier(.2,.8,.2,1)}
+.set.done-pop .check path{stroke-dasharray:22;animation:draw .32s .06s both}
+.set.done-pop .set-n.pr{animation:popIn .5s .1s cubic-bezier(.2,.8,.2,1) both}
+.card.ex.ring{animation:ring .7s ease-out}
+.in{animation:rise .4s cubic-bezier(.2,.8,.2,1) both}
+.bump{animation:popIn .35s cubic-bezier(.2,.8,.2,1)}
+.timer:not([hidden]){animation:slideUp .3s cubic-bezier(.2,.8,.2,1)}
+.timer-num{transform-origin:left center}
+.timer.over .timer-num{animation:pulse 1s ease-in-out infinite}
+.sheet:not([hidden]){animation:slideUp .32s cubic-bezier(.2,.8,.2,1)}
+.sheet-bg:not([hidden]){animation:fade .25s}
+.sheet.out{transform:translateY(100%);transition:transform .22s ease-in}
+.sheet-bg.out{opacity:0;transition:opacity .22s}
+.grab{flex:none;align-self:center;width:42px;height:5px;margin:-6px 0 -4px;border-radius:3px;background:var(--line)}
+.sheet-head,.grab{touch-action:none}
+.toast:not([hidden]){animation:toastIn .3s cubic-bezier(.2,.8,.2,1)}
+.fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -301,6 +352,7 @@ td:first-child{white-space:normal;min-width:130px}
 </div>
 
 <nav class="tabs" aria-label="Sections"><div class="wrap tabs-in" id="tabs">
+  <i class="tab-ind" id="tabInd" aria-hidden="true"></i>
   <button class="tab" data-act="tab:today"><svg viewBox="0 0 24 24"><path d="M2 12h20M5 8v8M8 6v12M16 6v12M19 8v8"/></svg>Today<span class="live" id="liveDot" hidden></span></button>
   <button class="tab" data-act="tab:plan"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button>
   <button class="tab" data-act="tab:history"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>History</button>
@@ -690,6 +742,8 @@ function toggleSet(ei,si){
     if(s.r==null){toast(e.mode==='time'?'Enter the seconds first.':e.mode==='cardio'?'Enter the minutes first.':'Enter the reps first.');return}
     if(e.mode==='reps'&&!def.bw&&!s.w){toast('Enter the weight first.');return}
     s.done=true;markPRs(e);startRest(e.rest||state.config.settings.rest||90);if(s.pr)toast('New personal record');
+    addFx(`[data-set="${ei}-${si}"]`,'done-pop');if(e.sets.every(x=>x.done))addFx(`[data-ex="${ei}"]`,'ring');
+    if(s.pr)fx.burst=`[data-set="${ei}-${si}"] .check`;buzz(s.pr?[20,40,20]:12);
   }else{s.done=false;markPRs(e)}
   saveActive();render();
 }
@@ -699,7 +753,7 @@ function finishWorkout(){
   if(!doneCount){discardWorkout();toast('Nothing was ticked off, so nothing was saved.');return}
   const w={id:a.id,date:localDate(a.start),start:a.start,end:Date.now(),routineId:a.routineId||null,name:a.name,
     entries:a.entries.map(e=>({ex:e.ex,mode:e.mode,prog:e.prog||null,why:e.why||'',sets:e.sets.map(s=>({w:s.w??null,r:s.r??null,tw:s.tw??null,tr:s.tr??null,done:!!s.done,rir:s.rir??null,amrap:!!s.amrap,pr:!!s.pr}))}))};
-  saveWorkout(w);clearActive();state.ui.summary=w.id;render();window.scrollTo(0,0);
+  saveWorkout(w);clearActive();state.ui.summary=w.id;fx.big=true;buzz([30,50,30,50,60]);render();window.scrollTo(0,0);
 }
 function clearActive(){state.active=null;state.meta.activeClearedAt=Date.now();persistActive();persist();clearTimeout(activeTimer);activeTimer=null;put('active/session',null);stopTimer();keepAwake(false)}
 function discardWorkout(){clearActive();render()}
@@ -734,16 +788,79 @@ async function keepAwake(on){
   }catch(e){}
 }
 
+/* ---------- motion: entrances, tweens, set pops, plate confetti ---------- */
+function placeTabInd(){const b=document.querySelector('#tabs .tab[aria-current="page"]'),ind=$('#tabInd');if(b&&ind){ind.style.width=b.offsetWidth+'px';ind.style.transform=`translateX(${b.offsetLeft}px)`}}
+window.addEventListener('resize',placeTabInd);
+const RM=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}};
+const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+// tweenPrev remembers the last value of each [data-tw] element so a re-render animates from it
+const tweenPrev={},fx={list:[],burst:null,big:false},rxKeys=new WeakMap();
+let viewKey='',enterTimer=null,fxc=null,rxN=0;
+const addFx=(sel,cls,scroll)=>fx.list.push([sel,cls,scroll]);
+const rxKey=rx=>{if(!rxKeys.has(rx))rxKeys.set(rx,++rxN);return rxKeys.get(rx)};
+function viewKeyNow(){
+  const t=state.ui.tab,f=state.ui.food;
+  if(t==='today')return state.active?'w:'+state.active.id:'today';
+  if(t==='plan')return 'plan:'+(state.ui.editRoutine||'');
+  if(t==='food')return 'food:'+(!GOALS[state.config.nutrition.goal]||f.edit==='goal'?'goal':f.edit==='body'||!nuReady()?'body':'targets');
+  return t;
+}
+function flipBefore(){const m={};document.querySelectorAll('#view [data-flip]').forEach(el=>{m[el.dataset.flip]=el.getBoundingClientRect().top});return m}
+function countUp(el,from,to,dec){
+  const fmt=v=>dec?v.toFixed(dec):Math.round(v).toLocaleString('en-GB'),t0=performance.now();
+  const step=now=>{if(!el.isConnected)return;const p=Math.min(1,(now-t0)/700);el.textContent=fmt(from+(to-from)*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
+}
+function motion(entering,flip){
+  const rm=RM();
+  document.querySelectorAll('#view [data-count]').forEach(el=>{const k=el.dataset.tw,to=Number(el.dataset.count),from=entering?0:tweenPrev[k];tweenPrev[k]=to;
+    if(!rm&&from!=null&&from!==to)countUp(el,from,to,+(el.dataset.dec||0))});
+  document.querySelectorAll('#view [data-grow]').forEach(el=>{const k=el.dataset.tw,p=el.dataset.prop||'width',to=el.style[p],from=entering?(el.dataset.from||'0%'):tweenPrev[k];tweenPrev[k]=to;
+    if(rm||from==null||from===to)return;el.style.transition='none';el.style[p]=from;void el.offsetWidth;el.style.transition='';el.style[p]=to});
+  if(entering&&!rm)document.querySelectorAll('#view .chart .ln').forEach(path=>{const L=path.getTotalLength();path.style.strokeDasharray=L;path.style.strokeDashoffset=L;void path.getBoundingClientRect();
+    path.style.transition='stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1) .15s';path.style.strokeDashoffset='0'});
+  if(flip&&!rm)document.querySelectorAll('#view [data-flip]').forEach(el=>{const top=flip[el.dataset.flip];if(top==null)return;const d=top-el.getBoundingClientRect().top;
+    if(Math.abs(d)>1)el.animate([{transform:`translateY(${d}px)`},{transform:'none'}],{duration:320,easing:'cubic-bezier(.2,.8,.2,1)'})});
+  for(const [sel,cls,scroll] of fx.list){const el=document.querySelector(sel);if(!el)continue;
+    if(!rm){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls)}
+    if(scroll)el.scrollIntoView({behavior:rm?'auto':'smooth',block:'center'})}
+  if(fx.burst){const el=document.querySelector(fx.burst);if(el){const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,60)}}
+  if(fx.big)burst(innerWidth/2,innerHeight*.3,140);
+  fx.list=[];fx.burst=null;fx.big=false;
+}
+// confetti in the plate colours: small rectangles that flip as they fall
+function burst(x,y,n){
+  if(RM())return;
+  if(!fxc){const c=document.createElement('canvas');c.className='fx';c.setAttribute('aria-hidden','true');document.body.appendChild(c);fxc={c,ctx:c.getContext('2d'),parts:[],raf:0}}
+  const dpr=Math.min(2,window.devicePixelRatio||1);fxc.c.width=Math.round(innerWidth*dpr);fxc.c.height=Math.round(innerHeight*dpr);
+  const cs=getComputedStyle(document.documentElement),cols=['--plate-25','--plate-20','--plate-15','--plate-10','--pr'].map(v=>cs.getPropertyValue(v).trim()||'#888');
+  for(let i=0;i<n;i++){const a=-Math.PI/2+(Math.random()-.5)*2.2,sp=5+Math.random()*8;
+    fxc.parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,w:6+Math.random()*6,h:9+Math.random()*9,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[i%cols.length],t:0})}
+  if(!fxc.raf)fxc.raf=requestAnimationFrame(fxTick);
+}
+function fxTick(){
+  const {c,ctx}=fxc,dpr=c.width/innerWidth;
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,innerWidth,innerHeight);
+  fxc.parts=fxc.parts.filter(p=>p.t<100&&p.y<innerHeight+40);
+  for(const p of fxc.parts){p.t++;p.vy+=.3;p.vx*=.98;p.vy*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;
+    ctx.save();ctx.globalAlpha=Math.min(1,(100-p.t)/30);ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h*Math.abs(Math.cos(p.t*.18+p.r)));ctx.restore()}
+  fxc.raf=fxc.parts.length?requestAnimationFrame(fxTick):0;
+}
+
 /* ---------- views ---------- */
 function confirmBtn(key,label,armed,cls){const on=state.ui.confirm===key;return `<button class="${cls}${on?' armed':''}" data-act="confirm:${key}">${on?armed:label}</button>`}
 function render(){
   const main=$('#view'),a=document.activeElement;
   const fid=a&&a.id&&main.contains(a)?a.id:null;let ss=null,se=null;try{ss=a.selectionStart;se=a.selectionEnd}catch(e){}
-  const t=state.ui.tab;
+  const t=state.ui.tab,key=viewKeyNow(),entering=key!==viewKey,flip=entering?null:flipBefore();viewKey=key;
+  main.classList.remove('enter');
   main.innerHTML=t==='plan'?viewPlan():t==='history'?viewHistory():t==='progress'?viewProgress():t==='food'?viewFood():viewToday();
+  if(entering&&!RM()){void main.offsetWidth;main.classList.add('enter');clearTimeout(enterTimer);enterTimer=setTimeout(()=>main.classList.remove('enter'),1000)}
   document.querySelectorAll('#tabs .tab').forEach(b=>{if(b.dataset.act==='tab:'+t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  placeTabInd();
   $('#liveDot').hidden=!state.active;
   if(fid){const el=document.getElementById(fid);if(el){el.focus({preventScroll:true});try{if(ss!=null)el.setSelectionRange(ss,se)}catch(e){}}}
+  motion(entering,flip);
   renderSheet();renderTimer();keepAwake(!!state.active);updateSync();
 }
 
@@ -786,7 +903,7 @@ function weekCard(){
   const since=mondayTs();let s=0,sets=0,vol=0,prs=0;
   for(const w of state.workouts){if(w.start<since)break;s++;const st=wStats(w);sets+=st.sets;vol+=st.vol;prs+=st.prs}
   return `<section class="card"><div class="row between"><p class="eyebrow">This week</p><span class="small muted">● trained&nbsp; ○ planned</span></div><div class="week">${cells}</div>
-  <div class="stats"><div class="stat"><b>${s}</b><span>Sessions</span></div><div class="stat"><b>${sets}</b><span>Sets</span></div><div class="stat"><b>${fmtVol(vol)}</b><span>Volume</span></div><div class="stat"><b>${prs}</b><span>PRs</span></div></div></section>`;
+  <div class="stats"><div class="stat"><b data-count="${s}" data-tw="wk-s">${s}</b><span>Sessions</span></div><div class="stat"><b data-count="${sets}" data-tw="wk-sets">${sets}</b><span>Sets</span></div><div class="stat"><b>${fmtVol(vol)}</b><span>Volume</span></div><div class="stat"><b data-count="${prs}" data-tw="wk-pr">${prs}</b><span>PRs</span></div></div></section>`;
 }
 function bwCard(){
   const E=state.bw.entries,last=E[E.length-1],goal=state.config.settings.goal;let line='No weigh-ins yet. Log one to start the chart.';
@@ -800,13 +917,14 @@ function summaryCard(w){
   const st=wStats(w);const prs=[];
   for(const e of w.entries)for(const s of e.sets)if(s.pr){const d=exById(e.ex);prs.push(`${esc(d?d.n:e.ex)}: ${s.w?fmtKg(s.w)+' kg × ':''}${s.r}${e.mode==='time'?' s':''}`)}
   return `<section class="card"><div class="row between"><p class="eyebrow">Workout saved</p><button class="icon-btn sm" data-act="summary-close" aria-label="Close">${X_SVG}</button></div><h2>${esc(w.name)}</h2>
-  <div class="stats"><div class="stat"><b>${st.min}</b><span>Minutes</span></div><div class="stat"><b>${st.sets}/${st.planned}</b><span>Sets</span></div><div class="stat"><b>${fmtVol(st.vol)}</b><span>Volume</span></div><div class="stat"><b>${st.prs}</b><span>PRs</span></div></div>
+  <div class="stats"><div class="stat"><b data-count="${st.min}" data-tw="sum-min">${st.min}</b><span>Minutes</span></div><div class="stat"><b>${st.sets}/${st.planned}</b><span>Sets</span></div><div class="stat"><b>${fmtVol(st.vol)}</b><span>Volume</span></div><div class="stat"><b data-count="${st.prs}" data-tw="sum-pr">${st.prs}</b><span>PRs</span></div></div>
   ${prs.length?`<ul class="clist">${prs.map(p=>`<li>${p}</li>`).join('')}</ul>`:''}${debriefBlock(w)}</section>`;
 }
 
 function viewWorkout(){
   const a=state.active;let done=0,total=0;a.entries.forEach(e=>e.sets.forEach(s=>{total++;if(s.done)done++}));
-  let h=`<section class="hero"><p class="eyebrow">In progress</p><h1>${esc(a.name)}</h1><p class="muted num"><span id="elapsed">${mins(a.start,Date.now())} min</span> · ${done}/${total} sets</p></section>`;
+  let h=`<section class="hero"><p class="eyebrow">In progress</p><h1>${esc(a.name)}</h1><p class="muted num"><span id="elapsed">${mins(a.start,Date.now())} min</span> · ${done}/${total} sets</p>
+  <div class="wbar" role="progressbar" aria-label="Sets done" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><i data-grow data-tw="wprog" style="width:${total?(done/total*100).toFixed(1):0}%"></i></div></section>`;
   if(!a.entries.length)h+=`<section class="card"><p class="muted">No exercises yet. Add the first one below.</p></section>`;
   a.entries.forEach((e,ei)=>{h+=exCard(e,ei)});
   h+=`<button class="btn block" data-act="ex-add">+ Add exercise</button><button class="btn primary big block" data-act="finish">Finish workout</button>${confirmBtn('discard','Discard workout','Tap again to throw it away','btn danger block')}`;
@@ -820,13 +938,14 @@ function exCard(e,ei){
   const cls=`${showW?'':' nw'}${rir?' rir':''}`;
   const s0=e.sets[0]||{};
   const rows=e.sets.map((s,si)=>{const id=`${ei}-${si}`;
-    return `<div class="set${cls}${s.done?' done':''}"><span class="set-n${s.pr?' pr':''}">${s.pr?'PR':(si+1)+(s.amrap?'+':'')}</span>
+    return `<div class="set${cls}${s.done?' done':''}" data-set="${id}"><span class="set-n${s.pr?' pr':''}">${s.pr?'PR':(si+1)+(s.amrap?'+':'')}</span>
     ${showW?`<input id="w-${id}" data-f="w:${ei}:${si}" inputmode="decimal" autocomplete="off" value="${fmtKg(s.w)}" placeholder="${d.bw?'0':'kg'}" aria-label="Set ${si+1} ${d.bw?'added ':''}weight in kg">`:''}
     <input id="r-${id}" data-f="r:${ei}:${si}" inputmode="numeric" autocomplete="off" value="${s.r??''}" placeholder="${s.tr??''}" aria-label="Set ${si+1} ${rLabel}">
     ${rir?`<select id="q-${id}" data-f="rir:${ei}:${si}" aria-label="Set ${si+1} reps left in the tank"><option value="">–</option>${[0,1,2,3,4].map(v=>`<option value="${v}"${s.rir===v?' selected':''}>${v===4?'4+':v}</option>`).join('')}</select>`:''}
     <button class="check" data-act="set-done:${ei}:${si}" aria-pressed="${!!s.done}" aria-label="Set ${si+1} done">${CHECK_SVG}</button></div>`}).join('');
   const amrapNote=e.sets.some(s=>s.amrap)?' · last set as many reps as you can':'';
-  return `<section class="card ex"><div class="ex-top"><div><h3>${esc(d.n)}</h3><p class="small muted">${MUSCLES[d.m]||''}${d.e?' · '+EQUIP[d.e]:''}${d.side?' · reps count both sides':''}</p></div></div>
+  const complete=e.sets.length>0&&e.sets.every(s=>s.done);
+  return `<section class="card ex${complete?' complete':''}" data-ex="${ei}"><div class="ex-top"><div><h3>${esc(d.n)}</h3><p class="small muted">${MUSCLES[d.m]||''}${d.e?' · '+EQUIP[d.e]:''}${d.side?' · reps count both sides':''}</p></div>${complete?'<span class="tag ok">Done</span>':''}</div>
   <p class="tgt">Target <b>${rxText(e.sets.length,s0,d)}</b><span class="small muted">${amrapNote}</span></p>
   ${e.why?`<p class="why">${esc(e.why)}</p>`:''}
   ${d.e==='barbell'?`<div class="plates" id="plates-${ei}">${platesHtml(curPlateW(e))}</div>`:''}
@@ -869,7 +988,7 @@ function rxCard(r,rx,i){
   if(!d)return `<section class="card"><p>This exercise no longer exists.</p><button class="btn sm danger" data-act="rx-remove:${i}">Remove</button></section>`;
   const prog=rx.prog||r.prog||'off',weighted=d.mode==='reps'&&!d.bw;
   const repsLabel=d.mode==='time'?'Seconds':d.mode==='cardio'?'Minutes':(prog==='double'&&weighted?'Top reps':'Reps');
-  return `<section class="card rx"><div class="rx-top"><div><h3>${esc(d.n)}</h3><p class="small muted">${MUSCLES[d.m]} · ${EQUIP[d.e]}${d.side?' · reps count both sides':''}</p></div>
+  return `<section class="card rx" data-rx="${i}" data-flip="rx${rxKey(rx)}"><div class="rx-top"><div><h3>${esc(d.n)}</h3><p class="small muted">${MUSCLES[d.m]} · ${EQUIP[d.e]}${d.side?' · reps count both sides':''}</p></div>
   <div class="row nowrap"><button class="icon-btn sm" data-act="rx-up:${i}" aria-label="Move up"${i===0?' disabled':''}>↑</button><button class="icon-btn sm" data-act="rx-down:${i}" aria-label="Move down"${i===r.ex.length-1?' disabled':''}>↓</button></div></div>
   <div class="grid-f">
   ${d.mode!=='cardio'?`<label class="field">Sets<input id="rx-${i}-sets" data-f="rx:${i}:sets" inputmode="numeric" value="${rx.sets??''}" placeholder="3"></label>`:''}
@@ -885,17 +1004,17 @@ function viewHistory(){
   const W=state.workouts;
   if(!W.length)return `<section class="hero"><h1>History</h1></section><section class="card"><p class="muted">Finished workouts land here, newest first. Start one from Today.</p></section>`;
   let sets=0,vol=0;W.forEach(w=>{const s=wStats(w);sets+=s.sets;vol+=s.vol});
-  let h=`<section class="hero"><h1>History</h1><p class="muted num">${W.length} workout${W.length>1?'s':''} · ${sets} sets · ${fmtVol(vol)} lifted</p></section>`,month='';
+  let h=`<section class="hero"><h1>History</h1><p class="muted num">${W.length} workout${W.length>1?'s':''} · ${sets} sets · ${fmtVol(vol)} lifted</p></section>`,month='',i=0;
   for(const w of W){const d=new Date(w.start),m=`${MON_LONG[d.getMonth()]} ${d.getFullYear()}`;
-    if(m!==month){if(month)h+='</div>';month=m;h+=`<p class="eyebrow month">${m}</p><div class="hlist">`}
-    h+=histItem(w)}
+    if(m!==month){if(month)h+='</div>';month=m;i=0;h+=`<p class="eyebrow month">${m}</p><div class="hlist">`}
+    h+=histItem(w,i++)}
   return h+'</div>';
 }
 function setText(s,mode){const w=s.w?`${fmtKg(s.w)} × `:'';if(mode==='cardio')return `${s.r??'–'} min`;if(mode==='time')return `${w}${s.r??'–'} s`;return `${w}${s.r??'–'}`}
-function histItem(w){
+function histItem(w,i){
   const st=wStats(w),open=!!state.ui.openHist[w.id],d=new Date(w.start);
-  return `<article class="hitem"><button class="hrow" data-act="hist:${w.id}" aria-expanded="${open}"><span class="hdate"><b>${d.getDate()}</b>${DAY_SHORT[d.getDay()]}</span><span class="hmain"><span class="hname">${esc(w.name)}</span><span class="small muted num">${st.min} min · ${st.sets}/${st.planned} sets · ${fmtVol(st.vol)}</span></span>${st.prs?`<span class="badge pr">${st.prs} PR</span>`:''}${w.coach&&w.coach.score?`<span class="badge">${w.coach.score}/10</span>`:''}</button>
-  ${open?`<div class="hdetail">${w.entries.map(e=>`<div class="hex"><p class="hex-n">${esc(exName(e.ex))}</p><p class="hsets">${workSets(e).map(s=>`<span class="hs${s.done?'':' miss'}${s.pr?' pr':''}" title="${s.done?(s.pr?'Personal record':'Done'):'Skipped'}">${setText(s,e.mode)}</span>`).join('')}</p></div>`).join('')}
+  return `<article class="hitem" style="--i:${i}"><button class="hrow" data-act="hist:${w.id}" aria-expanded="${open}"><span class="hdate"><b>${d.getDate()}</b>${DAY_SHORT[d.getDay()]}</span><span class="hmain"><span class="hname">${esc(w.name)}</span><span class="small muted num">${st.min} min · ${st.sets}/${st.planned} sets · ${fmtVol(st.vol)}</span></span>${st.prs?`<span class="badge pr">${st.prs} PR</span>`:''}${w.coach&&w.coach.score?`<span class="badge">${w.coach.score}/10</span>`:''}</button>
+  ${open?`<div class="hdetail" id="hd-${w.id}">${w.entries.map(e=>`<div class="hex"><p class="hex-n">${esc(exName(e.ex))}</p><p class="hsets">${workSets(e).map(s=>`<span class="hs${s.done?'':' miss'}${s.pr?' pr':''}" title="${s.done?(s.pr?'Personal record':'Done'):'Skipped'}">${setText(s,e.mode)}</span>`).join('')}</p></div>`).join('')}
   ${debriefBlock(w)}<div class="row"><span class="grow"></span>${confirmBtn('hist-del:'+w.id,'Delete workout','Tap again to delete','btn sm danger')}</div></div>`:''}</article>`;
 }
 
@@ -937,7 +1056,7 @@ function balanceCard(){
   const ent=Object.entries(m).sort((a,b)=>b[1]-a[1]),max=Math.max(target,...ent.map(e=>e[1]))*1.08;
   const zero=ent.filter(e=>!e[1]).map(e=>MUSCLES[e[0]]);
   return `<section class="card"><div class="row between"><p class="eyebrow">Sets per muscle</p><div class="row">${[7,28].map(d=>`<button class="chip" aria-pressed="${days===d}" data-act="bal:${d}">${d} days</button>`).join('')}</div></div>
-  <div class="bars">${ent.map(([k,v])=>`<div class="bar${v?'':' zero'}"><span class="lbl">${MUSCLES[k]}</span><span class="track"><span class="fill" style="width:${(v/max*100).toFixed(1)}%"></span><span class="goal" style="left:${(target/max*100).toFixed(1)}%"></span></span><span class="val num">${fmtKg(v)}</span></div>`).join('')}</div>
+  <div class="bars">${ent.map(([k,v])=>`<div class="bar${v?'':' zero'}"><span class="lbl">${MUSCLES[k]}</span><span class="track"><span class="fill" data-grow data-tw="bal-${k}" style="width:${(v/max*100).toFixed(1)}%"></span><span class="goal" style="left:${(target/max*100).toFixed(1)}%"></span></span><span class="val num">${fmtKg(v)}</span></div>`).join('')}</div>
   <p class="small muted">The marker is ${fmtKg(target)} sets: 10 a week, a common minimum for growth. Secondary muscles count as half a set.${zero.length&&state.workouts.length?` Not trained in this window: ${zero.join(', ')}.`:''}</p></section>`;
 }
 function bwProgressCard(){
@@ -1014,7 +1133,7 @@ function viewFood(){
 function foodGoalView(){
   const n=state.config.nutrition,back=GOALS[n.goal]&&nuReady();
   return `<section class="hero">${back?`<button class="btn ghost sm back" data-act="nu-cancel">← Targets</button>`:''}<p class="eyebrow">Food · step 1 of 2</p><h1>What’s your goal?</h1><p class="muted">Your calories, protein and food amounts all follow from this. You can change it any time.</p></section>
-  <section class="card"><div class="goals">${Object.entries(GOALS).map(([k,g])=>`<button class="starter" aria-pressed="${n.goal===k}" data-act="nu-goal:${k}"><b>${g.n}</b><span class="small">${g.blurb}</span></button>`).join('')}</div>
+  <section class="card"><div class="goals">${Object.entries(GOALS).map(([k,g],i)=>`<button class="starter" style="--i:${i}" aria-pressed="${n.goal===k}" data-act="nu-goal:${k}"><b>${g.n}</b><span class="small">${g.blurb}</span></button>`).join('')}</div>
   <p class="small muted">Not sure? Slim and fairly new to lifting: lean bulk. Carrying fat you want gone: cut. Somewhere in between: recomp.</p></section>`;
 }
 function foodBodyView(){
@@ -1040,15 +1159,15 @@ function foodTargetsView(){
   const sMove=n.goal==='recomp'?' The scale should barely move while your waist slowly shrinks.':n.goal==='maintain'?' Your weight should hold steady.':` Your weight should ${c.delta>0?'rise':'drop'} about ${fmtKg(wk)} kg a week.`;
   const hint=(n.goal==='bulk'||n.goal==='lean')&&c.bmi>=27?'Your BMI is on the high side for a bulk. A recomp or a cut first usually works better.':n.goal==='cut'&&c.bmi<20?'You’re already lean by BMI, so a cut will be hard going. A lean bulk or recomp may suit you better.':'';
   return `<section class="hero"><p class="eyebrow">Food · ${esc(g.n)}</p><h1>Your daily targets</h1><div class="row"><button class="btn sm" data-act="nu-edit:goal">Change goal</button><button class="btn sm ghost" data-act="nu-edit:body">Edit my details</button></div></section>
-  <section class="card"><p class="eyebrow">Calories a day</p><p class="kcal">${fmtInt(c.kcal)}<small>kcal</small></p>
+  <section class="card"><p class="eyebrow">Calories a day</p><p class="kcal"><span data-count="${c.kcal}" data-tw="kcal">${fmtInt(c.kcal)}</span><small>kcal</small></p>
   <p class="small muted">Maintenance is about ${fmtInt(Math.round(c.tdee/10)*10)} kcal.${sDelta}${sAdj}${sMove}</p>
   ${c.floored?'<p class="small">Held at a safe minimum, so the gap below maintenance is smaller than usual.</p>':''}${hint?`<p class="small">${hint}</p>`:''}${n.age<18?'<p class="small">You’re still growing, so skip hard cuts and talk to a doctor before dieting.</p>':''}
-  <div class="split" role="img" aria-label="Calories: ${pct[0]}% protein, ${pct[1]}% carbs, ${pct[2]}% fat"><i class="m-p" style="width:${pct[0]}%"></i><i class="m-c" style="width:${pct[1]}%"></i><i class="m-f" style="width:${pct[2]}%"></i></div>
+  <div class="split" role="img" aria-label="Calories: ${pct[0]}% protein, ${pct[1]}% carbs, ${pct[2]}% fat"><i class="m-p" data-grow data-tw="sp-p" style="width:${pct[0]}%"></i><i class="m-c" data-grow data-tw="sp-c" style="width:${pct[1]}%"></i><i class="m-f" data-grow data-tw="sp-f" style="width:${pct[2]}%"></i></div>
   <div class="legend"><span><i class="m-p"></i>Protein ${pct[0]}%</span><span><i class="m-c"></i>Carbs ${pct[1]}%</span><span><i class="m-f"></i>Fat ${pct[2]}%</span></div>
   <ul class="plist">
-  <li><span>Protein<span class="sub">${fmtKg(g.p)} g per kg of ${c.refKg!==c.kg?`a ${Math.round(c.refKg)} kg reference weight (BMI 27)`:'body weight'}, range ${g.pr}. About ${meal} g a meal over 4 meals.</span></span><span class="rx">${c.protein} g</span></li>
-  <li><span>Carbs<span class="sub">Your training fuel. If it all came from rice: about ${fmtKg(Math.round(c.carbs/RICE_CUP_C*2)/2)} cups cooked (1 cup ≈ 160 g).</span></span><span class="rx">${c.carbs} g</span></li>
-  <li><span>Fat<span class="sub">About a quarter of your calories. Cooking oil, eggs, nuts, fish.</span></span><span class="rx">${c.fat} g</span></li>
+  <li><span>Protein<span class="sub">${fmtKg(g.p)} g per kg of ${c.refKg!==c.kg?`a ${Math.round(c.refKg)} kg reference weight (BMI 27)`:'body weight'}, range ${g.pr}. About ${meal} g a meal over 4 meals.</span></span><span class="rx"><span data-count="${c.protein}" data-tw="m-p">${c.protein}</span> g</span></li>
+  <li><span>Carbs<span class="sub">Your training fuel. If it all came from rice: about ${fmtKg(Math.round(c.carbs/RICE_CUP_C*2)/2)} cups cooked (1 cup ≈ 160 g).</span></span><span class="rx"><span data-count="${c.carbs}" data-tw="m-c">${c.carbs}</span> g</span></li>
+  <li><span>Fat<span class="sub">About a quarter of your calories. Cooking oil, eggs, nuts, fish.</span></span><span class="rx"><span data-count="${c.fat}" data-tw="m-f">${c.fat}</span> g</span></li>
   <li><span>Fibre<span class="sub">Vegetables, fruit, oats, beans.</span></span><span class="rx">${c.fibre} g</span></li>
   <li><span>Water<span class="sub">Plus about 0.5 L on training days.</span></span><span class="rx">${fmtKg(c.water)} L</span></li></ul></section>
   ${proteinCard(c)}${bmiCard(c)}${trackCard(c)}
@@ -1060,13 +1179,13 @@ function proteinCard(c){
   const left=Math.max(0,c.protein-other-eggs*EGG_P);
   const cooked=Math.round(left/CHK_P/10)*10,raw=Math.round(cooked/.75/10)*10,parts=Math.max(1,Math.ceil(cooked/200));
   const fromChk=Math.round(cooked*CHK_P),kcal=eggs*70+cooked*1.65,fat=eggs*5+cooked*.036;
-  return `<section class="card"><p class="eyebrow">Hit your protein</p><h2>${c.protein} g a day</h2>
-  <div class="row between"><span>Eggs a day</span><span class="stepper"><button data-act="nu-eggs:-1" aria-label="One egg fewer"${eggs<=0?' disabled':''}>−</button><b class="num" aria-live="polite">${eggs}</b><button data-act="nu-eggs:1" aria-label="One egg more"${eggs>=10?' disabled':''}>+</button></span></div>
+  return `<section class="card"><p class="eyebrow">Hit your protein</p><h2><span data-count="${c.protein}" data-tw="p-h2">${c.protein}</span> g a day</h2>
+  <div class="row between"><span>Eggs a day</span><span class="stepper"><button data-act="nu-eggs:-1" aria-label="One egg fewer"${eggs<=0?' disabled':''}>−</button><b class="num" id="eggN" aria-live="polite">${eggs}</b><button data-act="nu-eggs:1" aria-label="One egg more"${eggs>=10?' disabled':''}>+</button></span></div>
   <ul class="plist">
-  <li><span>${eggs} large egg${eggs===1?'':'s'}<span class="sub">About 6 g protein each.${eggs>=5?' That’s a lot of yolks. Egg whites give about 3.5 g each with almost no fat.':''}</span></span><span class="rx">${eggs*EGG_P} g</span></li>
-  <li><span>${cooked?`${cooked} g chicken breast, cooked`:'No chicken needed'}<span class="sub">${cooked?`Skinless. About ${raw} g raw${parts>1?`, split into ${parts} portions of about ${Math.round(cooked/parts/10)*10} g`:''}.`:'Your eggs and other food already cover it.'}</span></span><span class="rx">${fromChk} g</span></li>
+  <li><span>${eggs} large egg${eggs===1?'':'s'}<span class="sub">About 6 g protein each.${eggs>=5?' That’s a lot of yolks. Egg whites give about 3.5 g each with almost no fat.':''}</span></span><span class="rx"><span data-count="${eggs*EGG_P}" data-tw="eggp">${eggs*EGG_P}</span> g</span></li>
+  <li><span>${cooked?`<span data-count="${cooked}" data-tw="chk">${cooked}</span> g chicken breast, cooked`:'No chicken needed'}<span class="sub">${cooked?`Skinless. About ${raw} g raw${parts>1?`, split into ${parts} portions of about ${Math.round(cooked/parts/10)*10} g`:''}.`:'Your eggs and other food already cover it.'}</span></span><span class="rx"><span data-count="${fromChk}" data-tw="chkp">${fromChk}</span> g</span></li>
   <li><span>Rice, bread, noodles, veg<span class="sub">Rough estimate from your carbs</span></span><span class="rx">~${other} g</span></li>
-  <li><span><b>Total</b></span><span class="rx">${eggs*EGG_P+fromChk+other} g</span></li></ul>
+  <li><span><b>Total</b></span><span class="rx"><span data-count="${eggs*EGG_P+fromChk+other}" data-tw="ptot">${eggs*EGG_P+fromChk+other}</span> g</span></li></ul>
   <p class="small muted">The eggs and chicken come to about ${fmtInt(kcal)} kcal and ${Math.round(fat)} g fat of your day.</p>
   <p class="eyebrow">Each of these swaps in for about 25 g protein</p>
   <ul class="clist"><li>80 g cooked chicken breast</li><li>4 large eggs</li><li>1 can of tuna in water, drained</li><li>1 scoop of whey (check your tub’s label)</li><li>125 g tempeh</li><li>100 g cooked lean beef</li></ul></section>`;
@@ -1077,8 +1196,8 @@ function bmiCard(c){
   const asia=b<18.5?'Underweight':b<23?'Healthy weight':b<27.5?'Overweight':'Obese';
   const pos=Math.min(100,Math.max(0,(b-15)/25*100)).toFixed(1);
   return `<section class="card"><p class="eyebrow">Body mass index</p>
-  <div class="row"><span class="kcal sm">${b.toFixed(1)}</span><span class="tag ${cls}">${cat}</span></div>
-  <div class="bmi" role="img" aria-label="BMI ${b.toFixed(1)} on a scale from 15 to 40"><div class="bmi-band"><i class="b-w" style="width:14%"></i><i class="b-o" style="width:26%"></i><i class="b-w" style="width:20%"></i><i class="b-d" style="width:40%"></i></div><span class="bmi-mark" style="left:${pos}%"></span>
+  <div class="row"><span class="kcal sm" data-count="${b.toFixed(1)}" data-dec="1" data-tw="bmi">${b.toFixed(1)}</span><span class="tag ${cls}">${cat}</span></div>
+  <div class="bmi" role="img" aria-label="BMI ${b.toFixed(1)} on a scale from 15 to 40"><div class="bmi-band"><i class="b-w" style="width:14%"></i><i class="b-o" style="width:26%"></i><i class="b-w" style="width:20%"></i><i class="b-d" style="width:40%"></i></div><span class="bmi-mark" data-grow data-prop="left" data-tw="bmi-mark" style="left:${pos}%"></span>
   <div class="bmi-ticks" aria-hidden="true"><span style="left:14%">18.5</span><span style="left:40%">25</span><span style="left:60%">30</span></div></div>
   <p class="small muted">Weight in kg ÷ height in metres². At ${fmtKg(cm)} cm, the healthy range (BMI 18.5–24.9) is ${Math.round(18.5*m*m)}–${Math.round(24.9*m*m)} kg.${asia!==cat?` On the Asian scale used in Malaysia, where healthy is 18.5–22.9, you read as ${asia.toLowerCase()}.`:''} BMI can’t tell muscle from fat, so a muscular lifter can read as overweight while lean. Treat it as a rough guide.</p></section>`;
 }
@@ -1104,10 +1223,15 @@ function trackCard(c){
 /* ---------- sheets ---------- */
 function renderSheet(){
   const sh=$('#sheet'),bg=$('#sheetBg'),k=state.ui.sheet;
-  if(!k){if(!sh.hidden){sh.hidden=true;bg.hidden=true;sh.innerHTML=''}return}
+  if(!k){
+    // slide down, then hide; a reopen inside the slide cancels the hide
+    if(!sh.hidden&&!sh.classList.contains('out')){sh.style.transform='';sh.classList.add('out');bg.classList.add('out');
+      setTimeout(()=>{if(!state.ui.sheet){sh.hidden=true;bg.hidden=true;sh.innerHTML=''}sh.classList.remove('out');bg.classList.remove('out')},RM()?0:220)}
+    return}
+  sh.classList.remove('out');bg.classList.remove('out');
   const a=document.activeElement,fid=a&&a.id&&sh.contains(a)?a.id:null;let ss=null,se=null;try{ss=a.selectionStart;se=a.selectionEnd}catch(e){}
   const top=sh.scrollTop;
-  sh.innerHTML=`<div class="sheet-in">${k.kind==='picker'?pickerHtml():settingsHtml()}</div>`;sh.hidden=false;bg.hidden=false;sh.scrollTop=top;
+  sh.innerHTML=`<div class="sheet-in"><div class="grab" aria-hidden="true"></div>${k.kind==='picker'?pickerHtml():settingsHtml()}</div>`;sh.hidden=false;bg.hidden=false;sh.scrollTop=top;
   if(fid){const el=document.getElementById(fid);if(el){el.focus({preventScroll:true});try{if(ss!=null)el.setSelectionRange(ss,se)}catch(e){}}}
 }
 function pickerHtml(){
@@ -1232,7 +1356,7 @@ function applyCoachPlan(){
   const p=state.ui.coach.plan;if(!p)return;
   state.config.routines=p.routines.map(r=>({id:r.id,name:r.name,prog:r.prog,ex:r.ex.map(({why,...x})=>x)}));
   state.config.week=p.week;saveConfig(true);
-  Object.assign(state.ui.coach,{plan:null,raw:null,open:false});toast('Plan saved. Today shows what’s next.');render();
+  Object.assign(state.ui.coach,{plan:null,raw:null,open:false});toast('Plan saved. Today shows what’s next.');viewKey='';render();
 }
 function coachCard(){
   if(!SAMPLE)return '';const c=state.ui.coach,f=c.form;
@@ -1293,12 +1417,12 @@ function applyStarter(k){
   state.config.routines=Object.entries(s.routines).map(([name,[prog,list]])=>{const id=uid();ids[name]=id;
     return {id,name,prog,ex:list.map(([ex,sets,reps,repsMin,p,inc,rest])=>({id:ex,sets,reps,repsMin:repsMin??null,prog:p??null,inc:inc??null,rest:rest??null}))}});
   const week={};for(const [d,n] of Object.entries(s.days))week[d]=ids[n];
-  state.config.week=week;saveConfig(true);state.ui.editRoutine=null;toast(`${s.name} loaded.`);render();
+  state.config.week=week;saveConfig(true);state.ui.editRoutine=null;toast(`${s.name} loaded.`);viewKey='';render();
 }
 function pickExercise(id){
   const def=exById(id),tgt=state.ui.sheet&&state.ui.sheet.target;if(!def)return;
-  if(tgt==='session'&&state.active){state.active.entries.push(entryFromRx({id,sets:def.mode==='cardio'?1:3,reps:defReps(def),prog:'off'},null));saveActive()}
-  else if(tgt==='routine'&&editing()){const weighted=def.mode==='reps'&&!def.bw;editing().ex.push({id,sets:def.mode==='cardio'?1:3,reps:defReps(def),repsMin:weighted?8:null,prog:null,inc:null,rest:null});saveConfig(true)}
+  if(tgt==='session'&&state.active){state.active.entries.push(entryFromRx({id,sets:def.mode==='cardio'?1:3,reps:defReps(def),prog:'off'},null));addFx(`[data-ex="${state.active.entries.length-1}"]`,'in',true);saveActive()}
+  else if(tgt==='routine'&&editing()){const weighted=def.mode==='reps'&&!def.bw;editing().ex.push({id,sets:def.mode==='cardio'?1:3,reps:defReps(def),repsMin:weighted?8:null,prog:null,inc:null,rest:null});addFx(`[data-rx="${editing().ex.length-1}"]`,'in',true);saveConfig(true)}
   state.ui.sheet=null;render();
 }
 function saveCustom(){
@@ -1367,7 +1491,7 @@ function onAct(act,args){
     case 'starter':applyStarter(a0);break;
     case 'start':if(state.active){toast('Finish or discard the current workout first.');state.ui.tab='today';render();break}startWorkout(a0);break;
     case 'set-done':toggleSet(+a0,+args[1]);break;
-    case 'set-add':{const e=state.active.entries[+a0],l=e.sets[e.sets.length-1]||{};e.sets.push({tw:l.tw??null,tr:l.tr??null,w:l.w??l.tw??null,r:l.r??l.tr??null,done:false,rir:null});saveActive();render();break}
+    case 'set-add':{const e=state.active.entries[+a0],l=e.sets[e.sets.length-1]||{};e.sets.push({tw:l.tw??null,tr:l.tr??null,w:l.w??l.tw??null,r:l.r??l.tr??null,done:false,rir:null});addFx(`[data-set="${a0}-${e.sets.length-1}"]`,'in');saveActive();render();break}
     case 'set-remove':{const e=state.active.entries[+a0];if(e.sets.length>1){e.sets.pop();markPRs(e);saveActive();render()}break}
     case 'ex-add':state.ui.sheet={kind:'picker',target:'session'};state.ui.picker.custom=false;renderSheet();break;
     case 'finish':finishWorkout();break;
@@ -1375,7 +1499,7 @@ function onAct(act,args){
     case 'bw-save':{const v=num(($('#bwIn')||{}).value);if(v==null||v<25||v>350){toast('Enter your weight in kg, like 72.4');break}
       logBw(v);toast('Weight logged.');render();break}
     case 'bw-del':state.bw.entries=state.bw.entries.filter(x=>x.d!==a0);saveBw();render();break;
-    case 'hist':state.ui.openHist[a0]=!state.ui.openHist[a0];render();break;
+    case 'hist':state.ui.openHist[a0]=!state.ui.openHist[a0];if(state.ui.openHist[a0])addFx('#hd-'+a0,'in');render();break;
     case 'debrief':coachDebrief(a0);break;
     case 'debrief-stop':state.ui.debrief.ctl&&state.ui.debrief.ctl.abort();break;
     case 'bal':state.ui.balWin=+a0;saveUi();render();break;
@@ -1410,7 +1534,7 @@ function onAct(act,args){
     case 'nu-edit':state.ui.food.edit=a0;state.ui.food.kg=null;render();window.scrollTo(0,0);break;
     case 'nu-cancel':state.ui.food.edit=null;render();window.scrollTo(0,0);break;
     case 'nu-sex':state.config.nutrition.sex=a0;saveConfig();render();break;
-    case 'nu-eggs':{const n=state.config.nutrition;n.eggs=Math.min(10,Math.max(0,(n.eggs??GOALS[n.goal].eggs)+Number(a0)));saveConfig();render();break}
+    case 'nu-eggs':{const n=state.config.nutrition;n.eggs=Math.min(10,Math.max(0,(n.eggs??GOALS[n.goal].eggs)+Number(a0)));addFx('#eggN','bump');buzz(8);saveConfig();render();break}
     case 'nu-adj':{const n=state.config.nutrition,v=Number(a0);n.adj=Math.min(600,Math.max(-600,(n.adj||0)+v));n.adjAt=Date.now();saveConfig(true);toast(`Target ${v>0?'raised':'lowered'} by ${Math.abs(v)} kcal.`);render();break}
     case 'nu-adj-reset':{const n=state.config.nutrition;n.adj=0;n.adjAt=null;saveConfig(true);render();break}
     case 'nu-save':{const n=state.config.nutrition,l=lastBw(),raw=state.ui.food.kg,kg=raw!=null&&raw!==''?num(raw):l?l.kg:null;
@@ -1456,7 +1580,18 @@ function onField(t){
 
 /* ---------- wiring ---------- */
 let toastTimer=null;
-function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.hidden=true},2800)}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=true;void t.offsetWidth;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.hidden=true},2800)}
+// drag the sheet down by its handle or title to close it
+let drag=null;
+document.addEventListener('pointerdown',e=>{if(!state.ui.sheet||!e.target.closest('.sheet-head,.grab')||e.target.closest('button,input,select'))return;drag={y:e.clientY,dy:0,id:e.pointerId};$('#sheet').style.transition='none'});
+document.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;drag.dy=Math.max(0,e.clientY-drag.y);$('#sheet').style.transform=drag.dy?`translateY(${drag.dy}px)`:''});
+function endDrag(e){
+  if(!drag||e.pointerId!==drag.id)return;const sh=$('#sheet'),dy=drag.dy;drag=null;sh.style.transition='';
+  if(dy>90){state.ui.sheet=null;state.ui.importData=null;renderSheet()}
+  else if(dy){sh.style.transition='transform .2s cubic-bezier(.2,.8,.2,1)';sh.style.transform='';setTimeout(()=>{sh.style.transition=''},220)}
+}
+document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
+document.addEventListener('touchstart',()=>{},{passive:true}); // lets iPhone Safari show :active press states
 document.addEventListener('click',e=>{unlockAudio();const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const [act,...args]=b.dataset.act.split(':');onAct(act,args)});
 document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.f&&t.tagName!=='SELECT'&&t.type!=='checkbox')onField(t)});
 document.addEventListener('change',e=>{const t=e.target;if(t.id==='importFile'){onImport(t);return}if(t.dataset&&t.dataset.f&&(t.tagName==='SELECT'||t.type==='checkbox'))onField(t)});
